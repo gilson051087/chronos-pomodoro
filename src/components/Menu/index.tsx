@@ -1,10 +1,18 @@
-import { HistoryIcon, HouseIcon, SettingsIcon, SunIcon } from 'lucide-react';
+import { HistoryIcon, HouseIcon, MoonIcon, SettingsIcon, SunIcon } from 'lucide-react';
 import styles from './styles.module.css';
 import { useState, useEffect } from 'react';
 
 type AvailableThemes = 'dark' | 'light';
 export function Menu() {
-    const [Theme, setTheme ] = useState<AvailableThemes>('dark'); // Deixando a variavel com tipagem segura.
+    const [Theme, setTheme ] = useState<AvailableThemes>(() => {
+        const storageTheme = (localStorage.getItem('theme') as AvailableThemes) || 'dark';
+        return storageTheme;
+    }); 
+
+    const nextThemeIcon = {
+        dark: <SunIcon />,
+        light: <MoonIcon />
+    }
 
     function handleThemeChange(
         event: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
@@ -16,26 +24,17 @@ export function Menu() {
             const nextTheme = prevTheme === 'dark' ? 'light' : 'dark';
             return nextTheme;
         });
-
-        //document.documentElement.setAttribute('data-theme', theme);
-
     }
 
-    // useEffect(() => {
-    //     console.log('useEffect sem depebedencias', Date.now()); 
-    // }); // Executado todas as vezes que o compomente renderiza na tela
-
-    // useEffect(() => {
-    //     console.log('useEffect com arrau deps vazia', Date.now());
-    // },[]); // executa apenas quando o react monta componente na tela pela primeira vez
 
     useEffect(() => {
         console.log('', Date.now());
         document.documentElement.setAttribute('data-theme', Theme);
-    }, [Theme]);  // executa apenas quando o valor de theme mudar
+        localStorage.setItem('theme', Theme);
+    }, [Theme]);  
+
     return (
         <nav className={styles.menu}>
-            <h1>{Theme}</h1>
             <a className={styles.menuLink} href="#" aria-label='Ir para a home' title='Ir para a home'>
                 <HouseIcon />
                 
@@ -49,7 +48,7 @@ export function Menu() {
                 
             </a>
             <a className={styles.menuLink} href="#" aria-label='Mudar tema' title='Mudar tema' onClick={handleThemeChange}>
-                <SunIcon />
+            {nextThemeIcon[Theme]}
                 
             </a>
         </nav>
