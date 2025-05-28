@@ -5,10 +5,18 @@ import { Input } from "../Input";
 import { useRef } from "react";
 import type { TaskModel } from "../../models/TaskModel";
 import { useTaskContext } from "../../contexts/TaskContexts/useTaskContext";
+import { getNextCycle } from "../../utils/getNextCycle";
+import { getNextCycleType } from "../../utils/getNextCycleType";
+import { formatSecondsToMinutes } from "../../utils/formatSecondsToMinutes";
 
 export function MainForm() {
-  const { setState } = useTaskContext()
+  const { state, setState } = useTaskContext()
   const taskNameInput = useRef<HTMLInputElement>(null);
+
+  // cyclos
+  const nextCycle = getNextCycle(state.currentCycle);
+  const NextCycleType = getNextCycleType(nextCycle);
+
 
 function handleCreateNewTask(event: React.FormEvent<HTMLFormElement>) {
   event.preventDefault();
@@ -27,20 +35,20 @@ function handleCreateNewTask(event: React.FormEvent<HTMLFormElement>) {
     startDate: Date.now(),
     completeDate: null,
     interruptDate: null,
-    duration: 1,
-    type: 'workTime',
+    duration: state.config[NextCycleType],
+    type: NextCycleType,
   };
 
-  const secondsRemaining = newTask.duration * 60; // Convertendo minutos para segundos
+  const secondsRemaining = newTask.duration * 60; 
 
   setState(prevState => {
     return {
       ...prevState,
       config: { ...prevState.config },
       activeTask: newTask,
-      currentCycle: 1, // conferir depois
-      secondsRemaining, // conferir depois
-      formattedSecondsRemaining: '00:00', // conferir depois
+      currentCycle: nextCycle, 
+      secondsRemaining,
+      formattedSecondsRemaining: formatSecondsToMinutes(secondsRemaining), 
       tasks: [...prevState.tasks, newTask],
     };
   });
